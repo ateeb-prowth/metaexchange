@@ -4,7 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class MetaService {
-  constructor(private prisma: PrismaService) { }
+  constructor(public prisma: PrismaService) {}
 
   getAuthUrl(userId: number) {
     const url = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${process.env.META_APP_ID}&redirect_uri=${process.env.META_REDIRECT_URI}&scope=ads_read,ads_management,business_management&state=${userId}`;
@@ -27,16 +27,46 @@ export class MetaService {
 
     const accessToken = tokenRes.data.access_token;
 
-    await this.prisma.metaAccount.create({
-      data: {
-        userId: Number(userId),
-        accessToken,
+    // await this.prisma.metaAccount.update({
+    //   where: {
+    //     userId: Number(userId),
+    //   },
+    //   data: {
+    //     accessToken,
+    //   },
+    // });
+
+    const accountsRes = await axios.get(
+      `https://graph.facebook.com/v19.0/me/adaccounts`,
+      {
+        params: { access_token: accessToken },
       },
-    });
+    );
+
+    const accounts = accountsRes.data.data;
+
+    for (const acc of accounts) {
+      await this.prisma.metaAccount.upsert({
+        where: {
+          userId_accountId: {
+            userId: Number(userId),
+            accountId: acc.id,
+          },
+        },
+        update: {
+          accessToken,
+        },
+        create: {
+          userId: Number(userId),
+          accountId: acc.id,
+          accessToken,
+        },
+      });
+    }
 
     return {
       message: 'Meta connected successfully',
-      accessToken,
+      accountsCount: accounts.length,
     };
   }
 
@@ -53,8 +83,8 @@ export class MetaService {
     return res.data;
   }
 
-  async getUserMetaAccount(userId: number) {
-    return this.prisma.metaAccount.findFirst({
+  async getUserMetaAccounts(userId: number) {
+    return this.prisma.metaAccount.findMany({
       where: { userId },
     });
   }

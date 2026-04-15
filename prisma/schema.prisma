@@ -25,10 +25,14 @@ model User {
 }
 
 model MetaAccount {
-  id            Int      @id @default(autoincrement())
-  userId        Int
-  accessToken   String
-  createdAt     DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  accountId   String
+  accessToken String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, accountId])
 }
