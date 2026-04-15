@@ -30,7 +30,7 @@ export class MetaController {
   async handleCallback(@Req() req, @Res() res) {
     const { code, state } = req.query;
     await this.metaService.handleCallback(code, state);
-    return res.redirect('http://localhost:3001/dashboard');
+    return res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
   }
 
   //   @UseGuards(AuthGuard)
