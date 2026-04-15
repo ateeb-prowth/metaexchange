@@ -12,7 +12,7 @@ async function bootstrap() {
     }),
   );
   app.enableCors({
-    origin: 'http://localhost:3001',
+    origin: ['http://localhost:3001', 'https://frontend-app-e8vt.onrender.com'],
     credentials: true,
   });
   await app.listen(process.env.PORT ?? 3000);
