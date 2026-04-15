@@ -42,7 +42,7 @@ export class UserController {
   async googleAuthCallback(@Req() req, @Res() res) {
     const data = await this.userService.googleLogin(req.user);
     return res.redirect(
-      `${process.env.FRONTEND_URL}/dashboard?token=${data.accessToken}`,
+      `https://frontend-app-e8vt.onrender.com/dashboard?token=${data.accessToken}`,
     );
     // return this.userService.googleLogin(req.user);
   }
